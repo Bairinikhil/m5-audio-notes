@@ -35,6 +35,8 @@ Then open `firmware/sketch_aug27a/sketch_aug27a.ino` in Arduino IDE, add your Wi
 
 Tap to record. Tap again to turn speech into notes.
 
+See [Troubleshooting Notes](TROUBLESHOOTING.md) for the problems solved during development.
+
 ## What it does
 
 - Captures 16 kHz mono audio from the M5CoreS3 microphone.
