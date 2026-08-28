@@ -1,31 +1,45 @@
 # M5 Audio Notes
 
-An M5CoreS3 voice note device that streams microphone audio to a local Python server, transcribes it with Groq Whisper, summarizes only the explicitly stated notes with Groq GPT-OSS, and displays the result on the device.
+Speak. Stop. Get clean notes on your M5CoreS3.
 
-## Flow
+```text
+M5CoreS3 -> Wi-Fi -> Groq Whisper -> Groq Notes -> M5 display
+```
 
-M5CoreS3 microphone → 16 kHz mono 16-bit PCM WebSocket chunks → FastAPI WAV assembly → Groq `whisper-large-v3-turbo` → Groq `openai/gpt-oss-20b` → summary displayed on the M5CoreS3.
+## Start in 3 steps
 
-## Server setup
-
-Install dependencies:
+### 1. Install
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-Set credentials in the same PowerShell window used to start the server:
+### 2. Add your keys
 
 ```powershell
-$env:GROQ_API_KEY = "gsk_your_key"
+$env:GROQ_API_KEY = "your_groq_key"
 $env:LANGSMITH_TRACING = "true"
-$env:LANGSMITH_API_KEY = "lsv2_your_key"
+$env:LANGSMITH_API_KEY = "your_langsmith_key"
 $env:LANGSMITH_PROJECT = "m5-audio-notes"
+```
+
+LangSmith is optional. Remove those two LangSmith lines if you do not need traces.
+
+### 3. Run it
+
+```powershell
 python main.py
 ```
 
-Never commit real API keys, Wi-Fi passwords, audio files, or trace logs.
+Then open `firmware/sketch_aug27a/sketch_aug27a.ino` in Arduino IDE, add your Wi-Fi name/password and laptop IP, and upload it to the M5CoreS3.
 
-## Firmware setup
+Tap to record. Tap again to turn speech into notes.
 
-Open `firmware/sketch_aug27a/sketch_aug27a.ino` in Arduino IDE. Set the local Wi-Fi name/password and the laptop's LAN IP in the sketch before uploading. The default server port is `8000`.
+## What it does
+
+- Captures 16 kHz mono audio from the M5CoreS3 microphone.
+- Transcribes it with Groq Whisper.
+- Creates accurate, focused notes with Groq GPT-OSS.
+- Optionally traces the WAV, transcript, and summary in LangSmith.
+
+Keep API keys, Wi-Fi passwords, audio files, and logs private.
