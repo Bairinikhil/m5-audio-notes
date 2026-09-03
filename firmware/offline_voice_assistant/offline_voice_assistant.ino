@@ -12,7 +12,10 @@
 
 enum CommandId { CMD_START_RECORDING, CMD_STOP_RECORDING, CMD_SHOW_STATUS, CMD_CLEAR_SCREEN };
 static const sr_cmd_t commands[] = {
-    {CMD_START_RECORDING, "Start recording"}, {CMD_START_RECORDING, "Begin recording"}, {CMD_START_RECORDING, "Record"},
+    {CMD_START_RECORDING, "Start recording"}, {CMD_START_RECORDING, "Begin recording"},
+    {CMD_START_RECORDING, "Start"}, {CMD_START_RECORDING, "Begin"},
+    {CMD_START_RECORDING, "Record"}, {CMD_START_RECORDING, "Record audio"},
+    {CMD_START_RECORDING, "Start audio"},
     {CMD_STOP_RECORDING, "Stop recording"}, {CMD_STOP_RECORDING, "End recording"}, {CMD_STOP_RECORDING, "Stop"},
     {CMD_SHOW_STATUS, "Show status"}, {CMD_SHOW_STATUS, "Device status"},
     {CMD_CLEAR_SCREEN, "Clear screen"}, {CMD_CLEAR_SCREEN, "Clear display"}, {CMD_CLEAR_SCREEN, "Clear"}
