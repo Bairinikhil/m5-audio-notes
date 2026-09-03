@@ -36,7 +36,7 @@ def transcribe_audio(audio_filename):
 @traceable(name="Groq note summary", run_type="llm")
 def summarize_notes(raw_text):
     llm_response = client.chat.completions.create(
-        model="openai/gpt-oss-20b",
+        model="llama-3.1-8b-instant",
         messages=[
             {
                 "role": "system",
@@ -56,10 +56,9 @@ def summarize_notes(raw_text):
             {"role": "user", "content": raw_text},
         ],
         max_completion_tokens=1024,
-        reasoning_effort="low",
         temperature=0.2,
     )
-    return llm_response.choices[0].message.content
+    return (llm_response.choices[0].message.content or "").strip()
 
 
 @traceable(name="M5CoreS3 audio note pipeline", run_type="chain")
@@ -141,6 +140,7 @@ async def process_audio_websocket(websocket: WebSocket):
         raw_text, ai_summary = transcribe_and_summarize(
             wav_filename, make_wav_attachment(wav_filename)
         )
+        print(f"Transcription: {raw_text!r}")
         print(f"Audio processed successfully; summary length: {len(ai_summary or '')} characters")
         # Send plain text to the M5 so it can display the summary without JSON parsing.
         await websocket.send_text(ai_summary or "No summary was generated.")

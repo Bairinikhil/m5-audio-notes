@@ -42,7 +42,7 @@ See [Troubleshooting Notes](TROUBLESHOOTING.md) for the problems solved during d
 - Captures 16 kHz mono audio from the M5CoreS3 microphone.
 - Filters likely silence locally with a lightweight speech-activity gate.
 - Transcribes it with Groq Whisper.
-- Creates accurate, focused notes with Groq GPT-OSS.
+- Creates accurate, focused notes with Groq Llama.
 - Optionally traces the WAV, transcript, and summary in LangSmith.
 
 Keep API keys, Wi-Fi passwords, audio files, and logs private.

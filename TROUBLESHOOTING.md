@@ -18,7 +18,7 @@ The server tried to use the API key as the name of an environment variable.
 
 The ChatGPT Plus subscription did not include API credits.
 
-**Fix:** Switched the backend to Groq’s hosted API and used its Whisper and chat models.
+**Fix:** Switched the backend to Groq’s hosted API and used its Whisper and Llama chat models.
 
 ## 4. WebSocket `403` errors
 
@@ -61,4 +61,3 @@ M5CoreS3 microphone
   -> M5CoreS3 display
   -> LangSmith trace
 ```
-
