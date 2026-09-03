@@ -3,9 +3,9 @@
 #include <WebSocketsClient.h>
 
 // 1. CONFIGURE YOUR NETWORK (Update these)
-const char* ssid     = "YOUR_WIFI_NAME";
-const char* password = "WIFI_PASSWORD";
-const char* serverIP = "YOUR_SERVER_IP"; // Set locally before uploading
+const char* ssid     = "404 Network Not Found";
+const char* password = "K@rthik2001";
+const char* serverIP = "192.168.1.156"; // Set locally before uploading
 const int serverPort = 8000;
 
 WebSocketsClient webSocket;
@@ -17,10 +17,13 @@ bool showingSummary = false;
 int16_t audioBuffer[256];
 
 // Local speech gate: tune this if your room is unusually quiet or noisy.
-const int32_t VAD_THRESHOLD = 900;
-const uint8_t VAD_HANGOVER_CHUNKS = 20; // About 320 ms at 16 kHz.
+const int32_t VAD_THRESHOLD = 400;
+const uint8_t VAD_HANGOVER_CHUNKS = 30; // About 480 ms at 16 kHz.
+const uint8_t VAD_PREROLL_CHUNKS = 3; // Keep about 48 ms before speech starts.
 bool speechActive = false;
 uint8_t silentChunks = 0;
+int16_t preRoll[VAD_PREROLL_CHUNKS][256];
+uint8_t preRollCount = 0;
 
 int32_t audioLevel(const int16_t* samples, size_t count) {
     uint64_t total = 0;
@@ -157,18 +160,35 @@ void loop() {
         if (CoreS3.Mic.record(audioBuffer, 256, SAMPLE_RATE)) {
             // Gate silence locally before sending audio to the server.
             int32_t level = audioLevel(audioBuffer, 256);
+            bool startedThisChunk = false;
 
-            if (level >= VAD_THRESHOLD) {
+            if (!speechActive && level >= VAD_THRESHOLD) {
                 speechActive = true;
+                startedThisChunk = true;
+                silentChunks = 0;
+                // Send the recent quiet chunks first so the first word is not clipped.
+                uint8_t available = min(preRollCount, VAD_PREROLL_CHUNKS);
+                uint8_t first = preRollCount >= VAD_PREROLL_CHUNKS
+                    ? preRollCount % VAD_PREROLL_CHUNKS : 0;
+                for (uint8_t i = 0; i < available; i++) {
+                    uint8_t index = (first + i) % VAD_PREROLL_CHUNKS;
+                    webSocket.sendBIN((uint8_t*)preRoll[index], sizeof(preRoll[index]));
+                }
+                webSocket.sendBIN((uint8_t*)audioBuffer, sizeof(audioBuffer));
+            } else if (speechActive && level >= VAD_THRESHOLD) {
                 silentChunks = 0;
             } else if (speechActive) {
                 silentChunks++;
                 if (silentChunks > VAD_HANGOVER_CHUNKS) {
                     speechActive = false;
+                    preRollCount = 0;
                 }
             }
 
-            if (speechActive) {
+            if (!speechActive) {
+                memcpy(preRoll[preRollCount % VAD_PREROLL_CHUNKS], audioBuffer, sizeof(audioBuffer));
+                preRollCount++;
+            } else if (!startedThisChunk) {
                 // Stream speech audio over the WebSocket bridge.
                 webSocket.sendBIN((uint8_t*)audioBuffer, sizeof(audioBuffer));
             }
