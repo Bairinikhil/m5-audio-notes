@@ -56,7 +56,8 @@ void onSpeechEvent(sr_event_t event, int commandId, int phraseId) {
         else if (commandId == CMD_STOP_RECORDING) { recording = false; showState("STOPPED", "Recording stopped"); }
         else if (commandId == CMD_SHOW_STATUS) showState("STATUS", recording ? "Recording: ON" : "Recording: OFF");
         else if (commandId == CMD_CLEAR_SCREEN) showState("READY", "Waiting for wake word...");
-        ESP_SR.setMode(SR_MODE_WAKEWORD);
+        // Keep listening for another command until the command window times out.
+        ESP_SR.setMode(SR_MODE_COMMAND);
     } else if (event == SR_EVENT_TIMEOUT) {
         Serial.println("ESP-SR: command timeout");
         showState("READY", "Waiting for wake word...");
