@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+Keys.txt
 *.csv
 *.wav
 *.log
@@ -10,4 +11,3 @@ __pycache__/
 venv/
 *.user
 *.tmp
-
