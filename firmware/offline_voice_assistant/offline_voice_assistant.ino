@@ -63,6 +63,11 @@ void setup() {
     CoreS3.begin();
     showState("STARTING", "Loading offline speech model...");
     i2s.setTimeout(1000);
+    // CoreS3's built-in microphone is connected to I2S1.
+    if (!i2s.setPort(I2S_NUM_1)) {
+        showState("I2S ERROR", "Could not select microphone port");
+        return;
+    }
     i2s.setPins(MIC_BCLK, MIC_WS, -1, MIC_DATA, MIC_MCLK);
     if (!i2s.begin(I2S_MODE_STD, SAMPLE_RATE, I2S_DATA_BIT_WIDTH_16BIT,
                    I2S_SLOT_MODE_MONO, I2S_STD_SLOT_LEFT)) {
