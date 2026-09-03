@@ -16,6 +16,22 @@ bool showingSummary = false;
 // 256 samples x 2 bytes = 512 bytes of 16-bit PCM audio.
 int16_t audioBuffer[256];
 
+// Local speech gate: tune this if your room is unusually quiet or noisy.
+const int32_t VAD_THRESHOLD = 900;
+const uint8_t VAD_HANGOVER_CHUNKS = 20; // About 320 ms at 16 kHz.
+bool speechActive = false;
+uint8_t silentChunks = 0;
+
+int32_t audioLevel(const int16_t* samples, size_t count) {
+    uint64_t total = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        total += abs((int32_t)samples[i]);
+    }
+
+    return (int32_t)(total / count);
+}
+
 void printWrapped(const String& text) {
     const int maxChars = 26;
     String line = "";
@@ -139,8 +155,23 @@ void loop() {
     if (isRecording && webSocket.isConnected()) {
         // FIX 2: Use .record() instead of .read() as required by your library
         if (CoreS3.Mic.record(audioBuffer, 256, SAMPLE_RATE)) {
-            // Stream raw audio data over the WebSocket bridge to your Python server
-            webSocket.sendBIN((uint8_t*)audioBuffer, sizeof(audioBuffer));
+            // Gate silence locally before sending audio to the server.
+            int32_t level = audioLevel(audioBuffer, 256);
+
+            if (level >= VAD_THRESHOLD) {
+                speechActive = true;
+                silentChunks = 0;
+            } else if (speechActive) {
+                silentChunks++;
+                if (silentChunks > VAD_HANGOVER_CHUNKS) {
+                    speechActive = false;
+                }
+            }
+
+            if (speechActive) {
+                // Stream speech audio over the WebSocket bridge.
+                webSocket.sendBIN((uint8_t*)audioBuffer, sizeof(audioBuffer));
+            }
         }
     }
 }
