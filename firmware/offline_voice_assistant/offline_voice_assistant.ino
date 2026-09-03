@@ -12,10 +12,10 @@
 
 enum CommandId { CMD_START_RECORDING, CMD_STOP_RECORDING, CMD_SHOW_STATUS, CMD_CLEAR_SCREEN };
 static const sr_cmd_t commands[] = {
-    {CMD_START_RECORDING, "Start recording"}, {CMD_START_RECORDING, "Begin recording"},
-    {CMD_STOP_RECORDING, "Stop recording"}, {CMD_STOP_RECORDING, "End recording"},
+    {CMD_START_RECORDING, "Start recording"}, {CMD_START_RECORDING, "Begin recording"}, {CMD_START_RECORDING, "Record"},
+    {CMD_STOP_RECORDING, "Stop recording"}, {CMD_STOP_RECORDING, "End recording"}, {CMD_STOP_RECORDING, "Stop"},
     {CMD_SHOW_STATUS, "Show status"}, {CMD_SHOW_STATUS, "Device status"},
-    {CMD_CLEAR_SCREEN, "Clear screen"}, {CMD_CLEAR_SCREEN, "Clear display"}
+    {CMD_CLEAR_SCREEN, "Clear screen"}, {CMD_CLEAR_SCREEN, "Clear display"}, {CMD_CLEAR_SCREEN, "Clear"}
 };
 
 I2SClass i2s;
@@ -44,15 +44,18 @@ void showState(const char* title, const char* detail) {
 void onSpeechEvent(sr_event_t event, int commandId, int phraseId) {
     (void)phraseId;
     if (event == SR_EVENT_WAKEWORD) {
+        Serial.println("ESP-SR: wake word detected");
         showState("WAKE WORD", "Listening for command...");
         ESP_SR.setMode(SR_MODE_COMMAND);
     } else if (event == SR_EVENT_COMMAND) {
+        Serial.printf("ESP-SR: command detected, id=%d phrase=%d\n", commandId, phraseId);
         if (commandId == CMD_START_RECORDING) { recording = true; showState("RECORDING", "Command recognized"); }
         else if (commandId == CMD_STOP_RECORDING) { recording = false; showState("STOPPED", "Recording stopped"); }
         else if (commandId == CMD_SHOW_STATUS) showState("STATUS", recording ? "Recording: ON" : "Recording: OFF");
         else if (commandId == CMD_CLEAR_SCREEN) showState("READY", "Waiting for wake word...");
         ESP_SR.setMode(SR_MODE_WAKEWORD);
     } else if (event == SR_EVENT_TIMEOUT) {
+        Serial.println("ESP-SR: command timeout");
         showState("READY", "Waiting for wake word...");
         ESP_SR.setMode(SR_MODE_WAKEWORD);
     }
@@ -80,6 +83,7 @@ void setup() {
         showState("MODEL ERROR", "ESP-SR could not start");
         return;
     }
+    Serial.println("ESP-SR: ready; say Hi ESP, then a command");
     showState("READY", "Say the wake word, then a command");
 }
 
