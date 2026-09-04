@@ -50,6 +50,18 @@ LangSmith’s `RunTree` had a Pydantic forward-reference issue in the local Pyth
 
 **Fix:** Added a small compatibility rebuild before tracing starts.
 
+## 9. Offline assistant could not find speech models
+
+ESP-SR reported `MODEL_LOADER Can not find m.txt` and restarted because the model partition was missing.
+
+**Fix:** Select `ESP SR 16M (3MB APP/6MB SPIFFS/3.9MB MODEL)` before uploading the offline assistant sketch.
+
+## 10. Offline commands required the wake word every time
+
+The assistant returned to wake-word mode after each command.
+
+**Fix:** It now remains in command mode until the command timeout, allowing multiple commands after one `Hi ESP`.
+
 ## Final result
 
 ```text
@@ -60,4 +72,13 @@ M5CoreS3 microphone
   -> Groq note summary
   -> M5CoreS3 display
   -> LangSmith trace
+```
+
+The offline path is separate:
+
+```text
+M5CoreS3 microphone
+  -> ESP-SR WakeNet ("Hi ESP")
+  -> ESP-SR MultiNet command recognition
+  -> M5CoreS3 display/action
 ```

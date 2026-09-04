@@ -37,6 +37,14 @@ Tap to record. Tap again to turn speech into notes.
 
 See [Troubleshooting Notes](TROUBLESHOOTING.md) for the problems solved during development.
 
+## Offline voice assistant
+
+The separate `firmware/offline_voice_assistant/` sketch runs wake-word and command recognition directly on the M5CoreS3.
+
+In Arduino IDE, choose the `M5CoreS3` board and the `ESP SR 16M (3MB APP/6MB SPIFFS/3.9MB MODEL)` partition scheme, then upload `offline_voice_assistant.ino`.
+
+Say `Hi ESP`, then try `Start`, `Stop`, `Show status`, or `Clear screen`. This mode does not use Wi-Fi, Groq, or API keys.
+
 ## What it does
 
 - Captures 16 kHz mono audio from the M5CoreS3 microphone.
